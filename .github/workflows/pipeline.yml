@@ -1,0 +1,57 @@
+name: Playwright Tests Pipeline
+
+on:
+  push:
+    branches:
+    - main 
+    - gh-actions
+pull_request:
+    branches:
+    - main
+    - gh-actions
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install dependencies
+      run: npm install
+
+      
+    - name: Install Playwright
+      run: npx playwright install
+
+      
+    - name: Pull Docker image
+      run: docker pull rasilva1986/my-vue-app:v1
+
+      
+    - name: Start the application
+      run: docker run -d -p 3000:3000 rasilva1986/my-vue-app:v1
+
+      
+    - name: Wait for the application to be up
+      run: npx wait-on http://localhost:3000/
+
+      
+    - name: Run Playwright tests
+      env:
+        TEST_USERNAME: ${{ secrets.TEST_USERNAME }}
+        TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+      run: npm run run-tests
+
+      
+    - name: Save test results as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-test-results
+        path: ./playwright-report
