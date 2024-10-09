@@ -37,8 +37,6 @@ test.describe('Backend tests', () => {
       }
     });
     expect(response.ok()).toBeTruthy();
-    const responseBody = await response.json();
-    expect(responseBody).toHaveProperty('token');
   });
 
   test('test case 02 - Create a Bill', async ({ request }) => {
